@@ -619,6 +619,18 @@ class OrdersView:
                             st.toast("ยกเลิกคำสั่งซื้อสำเร็จ!")
                             st.rerun()
 
+                    if row['status'] == 'จองแล้ว':
+                            if st.button("📦 ยืนยันการรับชุด", key=f"btn_pickup_{row['order_id']}", use_container_width=True, type="primary"):
+                                # อัปเดตสถานะในตารางหลัก
+                                self.db.supabase.table('orders').update({'status': 'เช่าอยู่'}).eq('order_id', row['order_id']).execute()
+                                # อัปเดตสถานะในตารางสินค้าย่อย
+                                self.db.supabase.table('order_items').update({'item_status': 'เช่าอยู่'}).eq('order_id', row['order_id']).execute()
+                                
+                                st.toast("✅ อัปเดตสถานะเป็น 'เช่าอยู่' เรียบร้อย!")
+                                import time
+                                time.sleep(0.5)
+                                st.rerun()
+
 class CalendarView:
     def __init__(self, df_prod, df_orders, df_items):
         self.df_prod = df_prod
