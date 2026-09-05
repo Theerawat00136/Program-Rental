@@ -2,3 +2,5 @@ streamlit
 pandas
 supabase
 Pillow
+plotly
+streamlit-calendar
