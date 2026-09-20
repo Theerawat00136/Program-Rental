@@ -146,7 +146,13 @@ class ReceiptService:
         y += 35
         
         for _, row in sel_items.iterrows():
-            item_text = f"- {row['id']} {row['name']} ({row.get('color', '-')}/{row.get('size', '-')})"
+            raw_name = str(row.get('name', ''))
+            max_len = 25  
+            if len(raw_name) > max_len:
+                raw_name = raw_name[:max_len] + "..."
+            
+            item_text = f"- {row['id']} {raw_name} ({row.get('color', '-')}/{row.get('size', '-')})"
+            
             price_val = Formatter.safe_float(row.get('price', 0))
             price_str = "" if price_changed else f"{price_val:,.0f} THB"
             y = draw_item_row(y, item_text, price_str)
