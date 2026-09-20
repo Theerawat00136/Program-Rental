@@ -625,13 +625,13 @@ class OrdersView:
                         if st.button("✅ รับคืนชุด", key=f"btn_return_{row['order_id']}", use_container_width=True, type="primary"):
                             self.db.supabase.table('orders').update({'status': 'คืนแล้ว'}).eq('order_id', row['order_id']).execute()
                                 
-                            self.db.supabase.table('order_items').update({'item_status': 'ส่งซัก'}).eq('order_id', row['order_id']).execute()
+                            self.db.supabase.table('order_items').update({'item_status': 'รอซัก'}).eq('order_id', row['order_id']).execute()
                                 
                             pids_to_free = order_items['product_id'].tolist()
                             if pids_to_free:
-                                self.db.update_product_status(pids_to_free, "ส่งซัก")
+                                self.db.update_product_status(pids_to_free, "รอซัก")
                                 
-                            st.toast("✅ รับคืนชุดเรียบร้อย! ชุดถูกเปลี่ยนสถานะเป็น 'ส่งซัก'")
+                            st.toast("✅ รับคืนชุดเรียบร้อย! ชุดถูกเปลี่ยนสถานะเป็น 'รอซัก'")
                             import time
                             time.sleep(0.5)
                             st.rerun()

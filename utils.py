@@ -127,7 +127,7 @@ class ReceiptService:
             return y_pos + 35
 
         y = 30
-        title_text = "@Dressmebesties.co - " + ("CANCELED" if final_status=="ยกเลิก" else ("BOOKING" if final_status=="จองแล้ว" else "RECEIPT"))
+        title_text = "Dressme Rental - " + ("CANCELED" if final_status=="ยกเลิก" else ("BOOKING" if final_status=="จองแล้ว" else "RECEIPT"))
         d.text((300, y), title_text, font=self.font_title, fill=(31,41,55), anchor="mt")
         y += 50
         d.text((40, y), f"วันที่ทำรายการ: {tx_time}", font=self.font_small, fill=(107,114,128))
@@ -146,12 +146,12 @@ class ReceiptService:
         y += 35
         
         for _, row in sel_items.iterrows():
-            raw_name = str(row.get('name', ''))
-            max_len = 25  
-            if len(raw_name) > max_len:
-                raw_name = raw_name[:max_len] + "..."
+            full_name = str(row.get('name', ''))
+            item_text = f"- {row['id']} {full_name} ({row.get('color', '-')}/{row.get('size', '-')})"
             
-            item_text = f"- {row['id']} {raw_name} ({row.get('color', '-')}/{row.get('size', '-')})"
+            max_total_len = 38 
+            if len(item_text) > max_total_len:
+                item_text = item_text[:max_total_len] + "..."
             
             price_val = Formatter.safe_float(row.get('price', 0))
             price_str = "" if price_changed else f"{price_val:,.0f} THB"
@@ -179,7 +179,7 @@ class ReceiptService:
         y += 50
         d.line([(40, y), (560, y)], fill=(229,231,235), width=1)
         y += 20
-        d.text((300, y), "IG: @Dressmebesties.co  |  LINE: @Dressme", font=self.font_small, fill=(75,85,99), anchor="mt")
+        d.text((300, y), "IG: @Dressme Rental  |  LINE: @Dressme", font=self.font_small, fill=(75,85,99), anchor="mt")
         y += 25
         d.text((300, y), "ขอบคุณที่ใช้บริการค่ะ 💖 รีวิวแท็ก IG รับส่วนลด 10% น้า", font=self.font_small, fill=(107,114,128), anchor="mt")
 
