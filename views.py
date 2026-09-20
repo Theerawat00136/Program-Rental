@@ -502,7 +502,6 @@ class OrdersView:
             st.info("ยังไม่มีข้อมูลคำสั่งซื้อในระบบ")
             return
 
-        # เตรียมข้อมูล Orders
         display_orders = self.df_orders.copy()
         display_orders = display_orders.sort_values(by='order_date', ascending=False)
         
@@ -528,7 +527,6 @@ class OrdersView:
 
         st.write("---")
 
-        # แสดงผลแบบ Card
         for _, row in filtered_df.iterrows():
             with st.container(border=True):
                 c1, c2, c3, c4 = st.columns([2, 2.5, 1.5, 1.5])
@@ -559,7 +557,6 @@ class OrdersView:
                         items_list.append(f"{item['product_id']} {p_name}")
                         total_price += item.get('rent_price', 0)
                         
-                    # บวกค่าส่งเพิ่มเข้าไปใน total_price
                     total_price += row.get('shipping_fee', 0)
                     
                     items_html = "".join([f"<li>{item}</li>" for item in items_list])
@@ -583,7 +580,6 @@ class OrdersView:
                                     prod_row = self.df_prod[self.df_prod['product_id'] == pid].iloc[0]
                                     p_color = prod_row.get('color', '-')
                                     p_size = prod_row.get('size', '-')
-                                    # ถ้าหาชื่อไม่เจอจากตอนแรก ให้ดึงจากตาราง products แทน
                                     if not p_name or p_name == pid:
                                         p_name = prod_row.get('product_name', pid)
 
@@ -604,9 +600,7 @@ class OrdersView:
 
                     if row['status'] in ['จองแล้ว', 'เช่าอยู่']:
                         if st.button("❌ ยกเลิกออเดอร์", key=f"btn_cancel_{row['order_id']}", use_container_width=True):
-                            # ปรับสถานะบิลเป็นยกเลิก
                             self.db.supabase.table('orders').update({'status': 'ยกเลิก'}).eq('order_id', row['order_id']).execute()
-                            # ปรับรายการสินค้าในบิลให้ยกเลิก
                             self.db.supabase.table('order_items').update({'item_status': 'ยกเลิก'}).eq('order_id', row['order_id']).execute()
                             
                             # ปรับสถานะชุดคืนให้ว่าง
@@ -619,12 +613,25 @@ class OrdersView:
 
                     if row['status'] == 'จองแล้ว':
                             if st.button("📦 ยืนยันการรับชุด", key=f"btn_pickup_{row['order_id']}", use_container_width=True, type="primary"):
-                                # อัปเดตสถานะในตารางหลัก
                                 self.db.supabase.table('orders').update({'status': 'เช่าอยู่'}).eq('order_id', row['order_id']).execute()
-                                # อัปเดตสถานะในตารางสินค้าย่อย
                                 self.db.supabase.table('order_items').update({'item_status': 'เช่าอยู่'}).eq('order_id', row['order_id']).execute()
                                 
                                 st.toast("✅ อัปเดตสถานะเป็น 'เช่าอยู่' เรียบร้อย!")
+                                import time
+                                time.sleep(0.5)
+                                st.rerun()
+
+                    if row['status'] == 'เช่าอยู่':
+                            if st.button("✅ รับคืนชุด", key=f"btn_return_{row['order_id']}", use_container_width=True, type="primary"):
+                                self.db.supabase.table('orders').update({'status': 'คืนแล้ว'}).eq('order_id', row['order_id']).execute()
+                                
+                                self.db.supabase.table('order_items').update({'item_status': 'รอซัก'}).eq('order_id', row['order_id']).execute()
+                                
+                                pids_to_free = order_items['product_id'].tolist()
+                                if pids_to_free:
+                                    self.db.update_product_status(pids_to_free, "ว่าง")
+                                
+                                st.toast("✅ รับคืนชุดเรียบร้อย! สถานะชุดเปลี่ยนเป็น 'ว่าง'")
                                 import time
                                 time.sleep(0.5)
                                 st.rerun()
