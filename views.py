@@ -16,7 +16,6 @@ STATUS_LIST = ["ว่าง", "จองแล้ว", "เช่าอยู�
 SIZE_LIST = ["XS", "S", "M", "L", "XL", "XXL", "Free Size", "อื่นๆ"]
 COLOR_LIST = ["ขาว", "ดำ", "เทา", "แดง", "ชมพู", "ส้ม", "เหลือง", "เขียว", "ฟ้า", "น้ำเงิน", "ม่วง", "น้ำตาล", "อื่นๆ"]
 
-# 1. Service Classes (คลาสจัดการลอจิกเฉพาะทาง)
 class PricingService:
     @staticmethod
     def calc_rent_price(days, p1, p3, p5, p7):
@@ -230,7 +229,6 @@ class POSView:
                         except:
                             continue
 
-                # กรองสินค้าโชว์เฉพาะตัวที่ไม่โดนแบน (ไม่ได้อยู่ในช่วงเวลาที่ทับซ้อน) และต้องไม่ถูกยกเลิกจำหน่าย
                 if len(dates) == 2:
                     df_free = self.df_prod[
                         (~self.df_prod['product_id'].isin(busy_product_ids)) & 

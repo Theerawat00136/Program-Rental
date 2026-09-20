@@ -7,7 +7,6 @@ import re
 import pandas as pd
 
 
-#กลุ่มเครื่องมือจัดการข้อมูล (Static Class)
 class Formatter:
     """คลาสรวมเครื่องมือจัดรูปแบบข้อมูลตัวเลขและข้อความ"""
     

@@ -78,7 +78,6 @@ class DatabaseManager:
 
     def add_product(self, pid, name, cat_name, p1, p3, p5, p7, cost, fine, size, color):
         try:
-            # แปลงชื่อหมวดหมู่ไทย ให้เป็นรหัส CAT-XX ก่อนบันทึกลงฐานข้อมูล
             cat_map = {"ชุดราตรี": "CAT-01", "ชุดไทย": "CAT-02", "สูทผู้ชาย": "CAT-03", "เครื่องประดับ": "CAT-04"}
             db_cat_id = cat_map.get(cat_name, cat_name)
             

@@ -32,7 +32,7 @@ if not st.session_state['logged_in']:
             st.markdown(f"<h2 style='text-align: center; color: #2563EB !important;'>{st.session_state['shop_name']}</h2>", unsafe_allow_html=True)
             st.markdown(f"<p style='text-align: center; color: #6B7280; margin-bottom: 20px;'>{st.session_state['shop_desc']}</p>", unsafe_allow_html=True)
             
-            # เพิ่มช่อง Username และ Password
+      
             username = st.text_input("ชื่อผู้ใช้งาน (Username)", placeholder="กรุณากรอกชื่อผู้ใช้งาน")
             pwd = st.text_input("รหัสผ่าน (Password)", type="password", placeholder="กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ")
             
@@ -42,7 +42,7 @@ if not st.session_state['logged_in']:
                 db_conn = db.DatabaseManager(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
                 df_users = db_conn.get_users()
                 
-                # 2. ค้นหาชื่อผู้ใช้และรหัสผ่านที่กรอกมา (บังคับให้เป็น String ก่อนเทียบ)
+
                 user_match = df_users[(df_users['username'].astype(str).str.strip() == username.strip()) & (df_users['password_hash'].astype(str).str.strip() == pwd.strip())]
                 
                 if not user_match.empty:
