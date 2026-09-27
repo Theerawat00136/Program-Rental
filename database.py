@@ -30,8 +30,12 @@ class DatabaseManager:
     def get_users(self):
         try:
             res = self.supabase.table('users').select('*').execute()
-            if res.data: return pd.DataFrame(res.data)
-        except: pass
+            if res.data: 
+                return pd.DataFrame(res.data)
+        except Exception as e:
+            import streamlit as st
+            st.error(f"Database Error (get_users): {e}")
+            
         return pd.DataFrame(columns=['username', 'password_hash', 'role', 'status'])
 
     def get_orders(self):
