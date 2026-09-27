@@ -336,6 +336,19 @@ class POSView:
                         # ---------------------------------------------------------
 
                         if self.db.create_order(order_data, order_items_data):
+
+                            return_date_obj = datetime.strptime(return_dt_str, "%Y-%m-%d %H:%M:%S") 
+                            
+                            days_delay = 2 
+                            ready_date_obj = return_date_obj + timedelta(days=days_delay)
+                            
+                            ready_dt_str = ready_date_obj.strftime("%Y-%m-%d")
+                            
+                            update_stock = self.db.update_product_on_checkout(product_ids=p_ids, return_date=ready_dt_str, new_status=final_status)
+                            
+                            if update_stock:
+                                print(f"อัปเดตสต็อกเรียบร้อยแล้ว: {p_ids} พร้อมเช่าวันที่ {ready_dt_str}")
+
                             try:
                                 df_receipt_items = pd.DataFrame(receipt_items)
                                 
@@ -606,7 +619,10 @@ class OrdersView:
                             # ปรับสถานะชุดคืนให้ว่าง
                             pids_to_free = order_items['product_id'].tolist()
                             if pids_to_free:
-                                self.db.update_product_status(pids_to_free, "ว่าง")
+                                self.db.supabase.table('products').update({
+                                    'status': 'ว่าง',
+                                    'available_date': None
+                                }).in_('product_id', pids_to_free).execute()
                                 
                             st.toast("ยกเลิกคำสั่งซื้อสำเร็จ!")
                             st.rerun()
@@ -616,7 +632,16 @@ class OrdersView:
                                 self.db.supabase.table('orders').update({'status': 'เช่าอยู่'}).eq('order_id', row['order_id']).execute()
                                 self.db.supabase.table('order_items').update({'item_status': 'เช่าอยู่'}).eq('order_id', row['order_id']).execute()
                                 
-                                st.toast("✅ อัปเดตสถานะเป็น 'เช่าอยู่' เรียบร้อย!")
+                                # --- 🌟 ส่วนที่เพิ่มเข้ามาเพื่อแก้วันที่ใน Supabase 🌟 ---
+                                end_dt_str = str(row['end_date']) # ดึงวันที่กำหนดคืนจากบิล
+                                pids_to_update = order_items['product_id'].tolist() # ดึงรหัสชุดทั้งหมดในบิลนี้
+                                
+                                if pids_to_update:
+                                    # สั่งอัปเดตลงตาราง products ให้สถานะเป็น 'เช่าอยู่' และใส่วันที่ available_date เป็นวันคืนชุด
+                                    self.db.update_product_on_checkout(product_ids=pids_to_update, return_date=end_dt_str)
+                                # ----------------------------------------------------
+                                
+                                st.toast("✅ อัปเดตสถานะเป็น 'เช่าอยู่' และบันทึกวันที่คืนเรียบร้อย!")
                                 import time
                                 time.sleep(0.5)
                                 st.rerun()
@@ -624,14 +649,17 @@ class OrdersView:
                     if row['status'] == 'เช่าอยู่':
                         if st.button("✅ รับคืนชุด", key=f"btn_return_{row['order_id']}", use_container_width=True, type="primary"):
                             self.db.supabase.table('orders').update({'status': 'คืนแล้ว'}).eq('order_id', row['order_id']).execute()
-                                
                             self.db.supabase.table('order_items').update({'item_status': 'รอซัก'}).eq('order_id', row['order_id']).execute()
-                                
+                            
                             pids_to_free = order_items['product_id'].tolist()
                             if pids_to_free:
-                                self.db.update_product_status(pids_to_free, "รอซัก")
-                                
-                            st.toast("✅ รับคืนชุดเรียบร้อย! ชุดถูกเปลี่ยนสถานะเป็น 'รอซัก'")
+                                # เปลี่ยนสถานะเป็น "รอซัก" และเคลียร์วันที่ทิ้งด้วย
+                                self.db.supabase.table('products').update({
+                                    'status': 'รอซัก',
+                                    'available_date': None 
+                                }).in_('product_id', pids_to_free).execute()
+                            
+                            st.toast("✅ รับคืนชุดเรียบร้อย! ชุดถูกเปลี่ยนสถานะเป็น 'รอซัก' และลบวันกำหนดคืนแล้ว")
                             import time
                             time.sleep(0.5)
                             st.rerun()

@@ -1,6 +1,7 @@
 import pandas as pd
 from supabase import create_client, Client
 import streamlit as st
+from supabase import create_client
 
 class DatabaseManager:
     """คลาสสำหรับจัดการการเชื่อมต่อและดึงข้อมูลจาก Supabase (เวอร์ชัน 3NF แข็งแกร่ง)"""
@@ -104,3 +105,52 @@ class DatabaseManager:
             self.supabase.table('products').update(data).eq('product_id', old_id).execute()
             return True
         except: return False
+
+    def update_product_on_checkout(self, product_ids, return_date, new_status="เช่าอยู่"):
+        """
+        ใช้ตอนลูกค้าเช่า: เปลี่ยนสถานะเป็น 'เช่าอยู่' หรือ 'จองแล้ว' และใส่วันที่คืน
+        - product_ids: list ของรหัสสินค้า เช่น ['B-109', 'S-101']
+        - return_date: string วันที่กำหนดคืน เช่น '2026-09-21'
+        - new_status: สถานะที่ต้องการให้เปลี่ยน (ค่าเริ่มต้นคือ 'เช่าอยู่')
+        """
+        try:
+            for pid in product_ids:
+                self.supabase.table("products").update({
+                    "status": new_status,
+                    "available_date": return_date
+                }).eq("product_id", pid).execute()
+            return True
+        except Exception as e:
+            print(f"Error updating checkout: {e}")
+            return False
+
+    def update_product_on_return(self, product_ids):
+        """
+        ใช้ตอนลูกค้านำชุดมาคืน: เปลี่ยนสถานะกลับเป็น 'ว่าง' และลบวันที่
+        """
+        try:
+            for pid in product_ids:
+                self.supabase.table("products").update({
+                    "status": "ว่าง",
+                    "available_date": None
+                }).eq("product_id", pid).execute()
+            return True
+        except Exception as e:
+            print(f"Error updating return: {e}")
+            return False
+
+    def update_product_on_cancel(self, product_ids):
+        """
+        ใช้ตอนยกเลิกออร์เดอร์: เปลี่ยนสถานะกลับเป็น 'ว่าง' และลบวันที่
+        (ทำงานเหมือนตอนคืนของเป๊ะ แต่แยกชื่อไว้เพื่อความเข้าใจง่าย)
+        """
+        try:
+            for pid in product_ids:
+                self.supabase.table("products").update({
+                    "status": "ว่าง",
+                    "available_date": None
+                }).eq("product_id", pid).execute()
+            return True
+        except Exception as e:
+            print(f"Error updating cancel: {e}")
+            return False
