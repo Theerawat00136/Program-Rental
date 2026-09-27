@@ -79,7 +79,19 @@ class DatabaseManager:
 
     def add_product(self, pid, name, cat_name, p1, p3, p5, p7, cost, fine, size, color):
         try:
-            cat_map = {"ชุดราตรี": "CAT-01", "ชุดไทย": "CAT-02", "สูทผู้ชาย": "CAT-03", "เครื่องประดับ": "CAT-04"}
+            cat_map = {
+                "เสื้อ": "CAT-01", 
+                "เสื้อคลุม": "CAT-02", 
+                "ชุดเดรส": "CAT-03", 
+                "กางเกง": "CAT-04", 
+                "กระโปรง": "CAT-05", 
+                "หมวก": "CAT-06", 
+                "กระเป๋า": "CAT-07", 
+                "เครื่องประดับ": "CAT-08", 
+                "รองเท้า": "CAT-09", 
+                "ชุดเซ็ท": "CAT-10", 
+                "อื่นๆ": "CAT-11"
+            }
             db_cat_id = cat_map.get(cat_name, cat_name)
             
             data = {
@@ -94,7 +106,19 @@ class DatabaseManager:
 
     def edit_product_full(self, old_id, new_id, name, cat_name, p1, p3, p5, p7, cost, fine, size, color):
         try:
-            cat_map = {"ชุดราตรี": "CAT-01", "ชุดไทย": "CAT-02", "สูทผู้ชาย": "CAT-03", "เครื่องประดับ": "CAT-04"}
+            cat_map = {
+                "เสื้อ": "CAT-01", 
+                "เสื้อคลุม": "CAT-02", 
+                "ชุดเดรส": "CAT-03", 
+                "กางเกง": "CAT-04", 
+                "กระโปรง": "CAT-05", 
+                "หมวก": "CAT-06", 
+                "กระเป๋า": "CAT-07", 
+                "เครื่องประดับ": "CAT-08", 
+                "รองเท้า": "CAT-09", 
+                "ชุดเซ็ท": "CAT-10", 
+                "อื่นๆ": "CAT-11"
+            }
             db_cat_id = cat_map.get(cat_name, cat_name)
             
             data = {
