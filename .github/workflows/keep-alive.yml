@@ -1,0 +1,57 @@
+name: Keep Streamlit Alive
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Playwright
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Wake up Streamlit
+        run: |
+          python - << 'EOF'
+          import asyncio
+          from playwright.async_api import async_playwright
+
+          URL = "https://dressme-rental.streamlit.app/"
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  context = await browser.new_context(
+                      user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                  )
+                  page = await context.new_page()
+                  
+                  print(f"Navigating to {URL}...")
+                  await page.goto(URL, wait_until="networkidle", timeout=60000)
+
+                  wake_button = page.locator('button:has-text("Yes, get this app back up!")')
+                  if await wake_button.is_visible():
+                      print("App is sleeping. Clicking wake up button...")
+                      await wake_button.click()
+                      await page.wait_for_timeout(20000)
+                  else:
+                      print("App is active. Staying on page for 15 seconds to maintain session...")
+                      await page.wait_for_timeout(15000)
+
+                  print("Keep-alive task completed successfully.")
+                  await browser.close()
+
+          asyncio.run(main())
+          EOF
